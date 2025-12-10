@@ -60,7 +60,7 @@ def vector_search(search_text: str, index_name: str):
         response.raise_for_status()
         search_results = response.json()
 
-        log(f"Full search results JSON: {search_results}")
+        #log(f"Full search results JSON: {search_results}")
 
         context = "\n".join(
             [result.get("chunk", "") for result in search_results.get("value", [])]
@@ -84,6 +84,7 @@ def rewrite_query(user_question: str) -> str:
         SystemMessage(content="""
 You are an assistant that rewrites user questions to make them more suitable 
 for searching in a document database. Keep the meaning intact but optimize it for semantic search.
+Always replace common abbreviations with their full form. For example:"faks" → "fakultet".
 Do not add any extra information, just return the rewritten question.
 """),
         HumanMessage(content=user_question)
