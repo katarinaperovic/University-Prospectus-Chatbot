@@ -79,10 +79,26 @@ def vector_search(search_text: str, index_name: str):
     except Exception as e:
         return f"Unexpected error: {str(e)}"
 
+def rewrite_query(user_question: str) -> str:
+    messages = [
+        SystemMessage(content="""
+You are an assistant that rewrites user questions to make them more suitable 
+for searching in a document database. Keep the meaning intact but optimize it for semantic search.
+Do not add any extra information, just return the rewritten question.
+"""),
+        HumanMessage(content=user_question)
+    ]
+
+    result = llm.invoke(messages)
+    rewritten_question = result.content.strip()
+    log(f"Original question: {user_question}")
+    log(f"Rewritten question: {rewritten_question}")
+    return rewritten_question
 
 # Augmentation and generation
 def ask_question(user_question: str):
-    context = vector_search(user_question, os.getenv("COGNITIVESEARCHCONNECTOR5_INDEX_NAME"))
+    rewritten_question = rewrite_query(user_question)
+    context = vector_search(rewritten_question, os.getenv("COGNITIVESEARCHCONNECTOR5_INDEX_NAME"))
 
     messages = [
         SystemMessage(content="""
@@ -91,7 +107,7 @@ def ask_question(user_question: str):
     If the answer is not in the documents, respond: 'I could not find the answer in the provided documents.'
     """)
     ] + chat_history + [
-        HumanMessage(content=f"Question: {user_question}\n\nContext:\n{context}")
+        HumanMessage(content=f"Question: {rewritten_question}\n\nContext:\n{context}")
     ]
 
     result = llm.invoke(messages)
