@@ -129,6 +129,13 @@ def ask_question(user_question: str):
     result = llm.invoke(messages)
     answer = result.content
 
+    # Token tracking
+    token_usage = result.response_metadata.get("token_usage", {})
+    log("\nTOKEN USAGE")
+    log(f"Prompt tokens:     {token_usage.get('prompt_tokens', 0)}")
+    log(f"Completion tokens: {token_usage.get('completion_tokens', 0)}")
+    log(f"Total tokens:      {token_usage.get('total_tokens', 0)}")
+  
     # Log to Arize
     arize_client.log(
     model_id="university-rag-backend",
@@ -144,7 +151,6 @@ def ask_question(user_question: str):
     model_type=ModelTypes.GENERATIVE_LLM,
     environment=Environments.TRACING
 )
-
 
     chat_history.append(HumanMessage(content=user_question))
     chat_history.append(AIMessage(content=answer))
