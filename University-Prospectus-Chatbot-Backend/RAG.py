@@ -3,9 +3,23 @@ import requests
 from dotenv import load_dotenv
 from langchain_openai import AzureChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
+from arize.api import Client
+from uuid import uuid4
+from arize.utils.types import ModelTypes
+from arize.utils.types import Environments
+
+
 
 load_dotenv()
 
+# Arize client
+arize_client = Client(
+    api_key=os.getenv("ARIZE_API_KEY"),
+    space_key=os.getenv("ARIZE_SPACE_KEY")
+)
+
+
+#LLM 
 llm = AzureChatOpenAI(
     azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
     api_key=os.getenv("AZURE_OPENAI_API_KEY"),
@@ -82,10 +96,11 @@ def vector_search(search_text: str, index_name: str):
 def rewrite_query(user_question: str) -> str:
     messages = [
         SystemMessage(content="""
-You are an assistant that rewrites user questions to make them more suitable 
-for searching in a document database. Keep the meaning intact but optimize it for semantic search.
-Always replace common abbreviations with their full form. For example:"faks" → "fakultet".
-Do not add any extra information, just return the rewritten question.
+Rewrite the user question so it is more suitable for searching in the document database.
+KEEP THE SAME MEANING.
+DO NOT add or guess any information.
+DO NOT expand abbreviations unless they are unambiguous (e.g. “UDG” → “Univerzitet Donja Gorica”).
+Return ONLY the rewritten question, nothing else.
 """),
         HumanMessage(content=user_question)
     ]
@@ -113,6 +128,23 @@ def ask_question(user_question: str):
 
     result = llm.invoke(messages)
     answer = result.content
+
+    # Log to Arize
+    arize_client.log(
+    model_id="university-rag-backend",
+    model_version="v1",
+    prediction_id=str(uuid4()),
+    prediction_label=answer,
+    actual_label=None,
+    features={
+        "question": user_question,
+        "rewritten_question": rewritten_question,
+        "context": context
+    },
+    model_type=ModelTypes.GENERATIVE_LLM,
+    environment=Environments.TRACING
+)
+
 
     chat_history.append(HumanMessage(content=user_question))
     chat_history.append(AIMessage(content=answer))

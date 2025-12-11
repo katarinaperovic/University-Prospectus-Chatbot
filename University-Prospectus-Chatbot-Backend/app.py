@@ -9,17 +9,14 @@ CORS(app)
 def chat_endpoint():
     try:
         data = request.get_json()
-
-        # Front šalje:{ "chatInput": "...", "chatHistory": [...] }
         user_input = data.get("chatInput", "")
-
         answer = ask_question(user_input)
-        print("ANSWER TYPE:", type(answer))
-        print("ANSWER VALUE:", answer)
         return jsonify({"answer": answer})
-    
     except Exception as e:
+        import traceback
+        print(traceback.format_exc())  # ovo ispisuje full error u Docker logovima
         return jsonify({"error": str(e)}), 500
+
 
 
 if __name__ == "__main__":
