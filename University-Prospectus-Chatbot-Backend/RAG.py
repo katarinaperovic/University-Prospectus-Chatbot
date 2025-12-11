@@ -3,10 +3,6 @@ import requests
 from dotenv import load_dotenv
 from langchain_openai import AzureChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
-from arize.api import Client
-from uuid import uuid4
-from arize.utils.types import ModelTypes
-from arize.utils.types import Environments
 from arize.otel import register, Endpoint
 from openinference.instrumentation.langchain import LangChainInstrumentor
 
@@ -31,12 +27,6 @@ tracer_provider = register(
 # Instrumentovanje LangChain da automatski šalje trace-ove u Arize AX
 LangChainInstrumentor().instrument(tracer_provider=tracer_provider)
 log("LangChain tracing za Arize AX je uključen.")
-
-# Arize client
-arize_client = Client(
-    api_key=os.getenv("ARIZE_API_KEY"),
-    space_id=os.getenv("ARIZE_SPACE_ID")
-)
 
 
 #LLM 
@@ -81,20 +71,31 @@ def vector_search(search_text: str, index_name: str):
         "captions": "extractive",
         "answers": "extractive|count-5"
     }
-
     try:
-        response = requests.post(search_url,headers=headers,json=search_body,timeout=10)
-
+        response = requests.post(search_url, headers=headers, json=search_body, timeout=10)
         response.raise_for_status()
         search_results = response.json()
 
-        #log(f"Full search results JSON: {search_results}")
+        results = search_results.get("value", [])
 
-        context = "\n".join(
-            [result.get("chunk", "") for result in search_results.get("value", [])]
-        )
+        # Pronađeno
+        log("\n==================== AZURE SEARCH DEBUG ====================")
+        log(f"Upit: {search_text}")
+        log(f"Index: {index_name}")
+        log(f"Broj pronađenih dokumenata: {len(results)}\n")
+
+        for idx, doc in enumerate(results, start=1):
+            log(f"----- Rezultat {idx} -----")
+            log(f"ID: {doc.get('id', 'nema-id')}")
+            log(f"Search Score: {doc.get('@search.score', 'n/a')}")
+            log(f"Chunk (prvih 200 char): {doc.get('chunk', '')[:200]}...")
+            log("------------------------------------------------------------\n")
+
+        log("-------kraj-------\n")
+
+        context = "\n".join([doc.get("chunk", "") for doc in results])
         return context
-
+    
     except requests.exceptions.Timeout:
         return "Error: Search request timed out."
 
@@ -151,21 +152,6 @@ def ask_question(user_question: str):
     log(f"Completion tokens: {token_usage.get('completion_tokens', 0)}")
     log(f"Total tokens:      {token_usage.get('total_tokens', 0)}")
   
-    # Log to Arize
-    arize_client.log(
-    model_id="university-rag-backend",
-    model_version="v1",
-    prediction_id=str(uuid4()),
-    prediction_label=answer,
-    actual_label=None,
-    features={
-        "question": user_question,
-        "rewritten_question": rewritten_question,
-        "context": context
-    },
-    model_type=ModelTypes.GENERATIVE_LLM,
-    environment=Environments.TRACING
-)
 
     chat_history.append(HumanMessage(content=user_question))
     chat_history.append(AIMessage(content=answer))
