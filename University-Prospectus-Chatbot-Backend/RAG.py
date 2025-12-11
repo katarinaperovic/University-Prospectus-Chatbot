@@ -10,7 +10,6 @@ from arize.utils.types import Environments
 from arize.otel import register, Endpoint
 from openinference.instrumentation.langchain import LangChainInstrumentor
 
-
 load_dotenv()
 
 # Log
@@ -29,8 +28,7 @@ tracer_provider = register(
     log_to_console=True           
 )
 
-
-# Instrumentuj LangChain da automatski šalje trace-ove u Arize AX
+# Instrumentovanje LangChain da automatski šalje trace-ove u Arize AX
 LangChainInstrumentor().instrument(tracer_provider=tracer_provider)
 log("LangChain tracing za Arize AX je uključen.")
 
@@ -108,6 +106,7 @@ def vector_search(search_text: str, index_name: str):
 
     except Exception as e:
         return f"Unexpected error: {str(e)}"
+    
 
 def rewrite_query(user_question: str) -> str:
     messages = [
