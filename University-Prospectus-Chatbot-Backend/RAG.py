@@ -7,15 +7,37 @@ from arize.api import Client
 from uuid import uuid4
 from arize.utils.types import ModelTypes
 from arize.utils.types import Environments
-
+from arize.otel import register, Endpoint
+from openinference.instrumentation.langchain import LangChainInstrumentor
 
 
 load_dotenv()
 
+# Log
+def log(message: str):
+    verbose = os.environ.get("VERBOSE", "false")
+    if verbose.lower() == "true":
+        print(message, flush=True)
+
+
+# Arize OpenTelemetry Tracing setup
+tracer_provider = register(
+    space_id=os.getenv("ARIZE_SPACE_ID"),
+    api_key=os.getenv("ARIZE_API_KEY"),
+    project_name="university-rag-backend",
+    endpoint=Endpoint.ARIZE_EUROPE,  # vazno!!
+    log_to_console=True           
+)
+
+
+# Instrumentuj LangChain da automatski šalje trace-ove u Arize AX
+LangChainInstrumentor().instrument(tracer_provider=tracer_provider)
+log("LangChain tracing za Arize AX je uključen.")
+
 # Arize client
 arize_client = Client(
     api_key=os.getenv("ARIZE_API_KEY"),
-    space_key=os.getenv("ARIZE_SPACE_KEY")
+    space_id=os.getenv("ARIZE_SPACE_ID")
 )
 
 
@@ -30,12 +52,6 @@ llm = AzureChatOpenAI(
 
 chat_history = []
 
-
-# Log
-def log(message: str):
-    verbose = os.environ.get("VERBOSE", "false")
-    if verbose.lower() == "true":
-        print(message, flush=True)
 
 # Pretraga (Azure Cognitive Search)
 def vector_search(search_text: str, index_name: str):
