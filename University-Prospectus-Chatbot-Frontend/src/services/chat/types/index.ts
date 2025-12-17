@@ -8,7 +8,13 @@ export type ChatMessage = {
 
 export type ChatReqeust = {
     chatInput: string;
+    sessionId?: string;
     chatHistory: ChatHistory[];
+}
+
+export type ChatResponse = {
+    answer: string;
+    sessionId: string;
 }
 
 export type ChatHistory = {

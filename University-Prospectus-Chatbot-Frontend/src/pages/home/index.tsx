@@ -1,4 +1,5 @@
 import { ChatMessage } from '@/services/chat/types';
+import { chatService } from '@/services/chat';
 import { FC, useEffect, useRef, useState } from 'react';
 import { IoIosSend } from 'react-icons/io';
 import { ChatComponent } from './components/chat';
@@ -84,6 +85,7 @@ export const ChatPage: FC = () => {
   };
 
   const clearMessages = () => {
+    chatService.clearSession();
     setMessages([
       {
         id: 1,

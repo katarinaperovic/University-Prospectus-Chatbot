@@ -38,7 +38,8 @@ llm = AzureChatOpenAI(
     temperature=0.1
 )
 
-chat_history = []
+# Chat history per session (not per user - no login needed)
+user_chat_histories = {}
 
 
 # Pretraga (Azure Cognitive Search)
@@ -109,16 +110,65 @@ def vector_search(search_text: str, index_name: str):
         return f"Unexpected error: {str(e)}"
     
 
-def rewrite_query(user_question: str) -> str:
+def rewrite_query(user_question: str, session_id: str = "default") -> str:
+    # Get chat history for context
+    chat_history = user_chat_histories.get(session_id, [])
+    
+    # Build conversation context
+    history_context = ""
+    if chat_history:
+        history_context = "\n\nPrevious conversation:\n"
+        for msg in chat_history:
+            if isinstance(msg, HumanMessage):
+                history_context += f"Q: {msg.content}\n"
+            elif isinstance(msg, AIMessage):
+                history_context += f"A: {msg.content}\n"
+    
     messages = [
-        SystemMessage(content="""
-Rewrite the user question so it is more suitable for searching in the document database.
-KEEP THE SAME MEANING.
-DO NOT add or guess any information.
-DO NOT expand abbreviations unless they are unambiguous (e.g. “UDG” → “Univerzitet Donja Gorica”).
-Return ONLY the rewritten question, nothing else.
-"""),
-        HumanMessage(content=user_question)
+        SystemMessage(content="""You are a query formatter that uses conversation history to clarify and expand user questions.
+
+YOUR JOB:
+1. Fix grammar and spelling
+2. Expand ONLY these abbreviations: faks→fakultet, UDG→Univerzitet Donja Gorica
+3. ANALYZE the history to understand what "to", "ih", "to", "oni", etc refer to
+4. Expand vague pronouns based on history context
+5. NEVER add information not mentioned in the question or history
+6. Make the query clear for database search
+
+DETAILED EXAMPLES:
+
+Example 1 - Simple pronoun expansion:
+History: 
+  Q: Koliko ima predmeta na UDG?
+  A: UDG ima 10 predmeta.
+New Q: Koji su to?
+Result Q: "Koji su to predmeti na UDG?" (expanded "to" = "predmeti na UDG")
+
+Example 2 - Multiple context:
+History:
+  Q: Koliko ima ucionica?
+  A: Univerzitet ima 20 ucionica.
+New Q: Koliko ih ima po spratu?
+Result Q: Koliko ima ucionica po spratu?
+
+Example 3 - No clear history:
+History: (empty or unrelated)
+New Q: Koji su to?
+Result: "Koji su to?" (keep vague - can't clarify)
+
+Example 4 - Already clear:
+History: "UDG ima 12 fakulteta"
+New Q: "Napiši sve fakultete"
+Result Q: "Napiši sve fakultete" (already clear, no change needed)
+
+CRITICAL RULES:
+- Extract the NOUN from history that matches the context
+- Extract any QUALIFIERS (sa pravom, na UDG, itd)
+- Combine them logically
+- If unclear, keep the question as-is
+
+Return ONLY the reformatted question, nothing else."""),
+        HumanMessage(content=f"Question: {user_question}{history_context}")
     ]
 
     result = llm.invoke(messages)
@@ -128,15 +178,18 @@ Return ONLY the rewritten question, nothing else.
     return rewritten_question
 
 # Augmentation and generation
-def ask_question(user_question: str):
-    rewritten_question = rewrite_query(user_question)
+def ask_question(user_question: str, session_id: str = "default"):
+    rewritten_question = rewrite_query(user_question, session_id)
     context = vector_search(rewritten_question, os.getenv("COGNITIVESEARCHCONNECTOR5_INDEX_NAME"))
+
+    # Get session-specific chat history
+    chat_history = user_chat_histories.get(session_id, [])
 
     messages = [
         SystemMessage(content="""
-    You are an assistant that answers questions ONLY using the provided documents.
-    Use only the text in the Context below.
-    If the answer is not in the documents, respond: 'I could not find the answer in the provided documents.'
+You are an assistant that answers questions using the provided documents and conversation history.
+Use the Context provided and refer to the conversation history to answer questions.
+If the answer is not found in either the Context or conversation history, respond: 'I could not find the answer in the provided documents.'
     """)
     ] + chat_history + [
         HumanMessage(content=f"Question: {rewritten_question}\n\nContext:\n{context}")
@@ -152,9 +205,10 @@ def ask_question(user_question: str):
     log(f"Completion tokens: {token_usage.get('completion_tokens', 0)}")
     log(f"Total tokens:      {token_usage.get('total_tokens', 0)}")
   
-
+    # Update session history
     chat_history.append(HumanMessage(content=user_question))
     chat_history.append(AIMessage(content=answer))
+    user_chat_histories[session_id] = chat_history
 
     print(f"Answer: {answer}")
     return answer
