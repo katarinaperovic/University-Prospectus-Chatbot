@@ -98,15 +98,15 @@ export const ChatPage: FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-black dark:to-gray-900 relative overflow-hidden">
+    <div className="flex flex-col h-full bg-gray-800 dark:bg-gray-800 relative overflow-hidden">
       {/* Decorative Background Elements */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-sixt opacity-5 rounded-full blur-3xl"></div>
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-sixt-light opacity-5 rounded-full blur-3xl"></div>
       
       {/* Header - Ultra Modern */}
-      <div className="relative overflow-hidden bg-black border-b-[3px] border-[#FF5F00]">
+      <div className="relative overflow-hidden bg-black border-b-[3px] border-[#800020]">
         {/* Animated gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#FF5F00]/10 via-transparent to-[#FF5F00]/10 animate-shimmer"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-[#800020]/10 via-transparent to-[#800020]/10 animate-shimmer"></div>
         
         {/* Glassmorphism layer */}
         <div className="glass-effect absolute inset-0"></div>
@@ -118,14 +118,14 @@ export const ChatPage: FC = () => {
             <div>
               <div className="flex items-center gap-2 mt-1">
                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                <p className="text-xs text-gray-400 font-medium">Always Ready - Premium Support</p>
+                <p className="text-xs text-gray-400 font-medium">ChatBot is available 24/7</p>
               </div>
             </div>
           </div>
         </div>
         
         {/* Bottom glow effect */}
-        <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#FF5F00] to-transparent"></div>
+        <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#800020] to-transparent"></div>
       </div>
 
       {/* Chat Messages Area */}
@@ -139,7 +139,7 @@ export const ChatPage: FC = () => {
       {/* Input Area - Ultra Modern */}
       <div className="relative border-t-2 border-gray-200 dark:border-gray-800 bg-white/90 dark:bg-black/90 backdrop-blur-2xl">
         {/* Gradient line */}
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#FF5F00] to-transparent"></div>
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#800020] to-transparent"></div>
         
         <div className="px-6 md:px-12 py-6 relative z-10">
           <div className="max-w-6xl mx-auto">
@@ -148,7 +148,7 @@ export const ChatPage: FC = () => {
               <div className="flex justify-end mb-3">
                 <button
                   onClick={clearMessages}
-                  className="text-sm text-[#FF5F00] hover:text-[#FF7A2E] font-medium transition-colors duration-300 flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-[#FF5F00]/5"
+                  className="text-sm text-[#800020] hover:text-[#A00030] font-medium transition-colors duration-300 flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-[#800020]/5"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
@@ -160,7 +160,7 @@ export const ChatPage: FC = () => {
             
             <div className="relative group">
               {/* Focus glow effect */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-[#FF5F00] to-[#E55500] rounded-3xl opacity-0 group-focus-within:opacity-20 blur-xl transition-opacity duration-500"></div>
+              <div className="absolute -inset-1 bg-gradient-to-r from-[#800020] to-[#600018] rounded-3xl opacity-0 group-focus-within:opacity-20 blur-xl transition-opacity duration-500"></div>
               
               <div className="relative flex items-end gap-3">
                 <div className="flex-1 relative">
@@ -170,7 +170,7 @@ export const ChatPage: FC = () => {
                     placeholder="Ask me anything about UDG University..."
                     onKeyDown={handleKeyPress}
                     value={message}
-                    className="w-full bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 focus:border-[#FF5F00] dark:focus:border-[#FF5F00] rounded-2xl min-h-[60px] max-h-[150px] resize-none text-base px-5 py-4 shadow-xl shadow-[#FF5F00]/15 transition-all duration-300 hover:shadow-2xl hover:shadow-[#FF5F00]/20 focus:shadow-2xl focus:shadow-[#FF5F00]/25 placeholder:text-gray-400"
+                    className="w-full bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 focus:border-[#800020] dark:focus:border-[#800020] rounded-2xl min-h-[60px] max-h-[150px] resize-none text-base px-5 py-4 shadow-xl shadow-[#800020]/15 transition-all duration-300 hover:shadow-2xl hover:shadow-[#800020]/20 focus:shadow-2xl focus:shadow-[#800020]/25 placeholder:text-gray-400"
                     disabled={isPendingAnswer}
                   />
                   
@@ -189,7 +189,7 @@ export const ChatPage: FC = () => {
                     ${
                       isPendingAnswer || !message.trim()
                         ? 'bg-gray-300 dark:bg-gray-700 opacity-50 cursor-not-allowed'
-                        : 'bg-gradient-to-br from-[#FF5F00] to-[#E55500] hover:from-[#FF7A2E] hover:to-[#FF5F00] text-white shadow-2xl hover:shadow-[#FF5F00]/50 hover:scale-110 active:scale-95 cursor-pointer'
+                        : 'bg-gradient-to-br from-[#800020] to-[#600018] hover:from-[#A00030] hover:to-[#800020] text-white shadow-2xl hover:shadow-[#800020]/50 hover:scale-110 active:scale-95 cursor-pointer'
                     }
                   `}
                 >

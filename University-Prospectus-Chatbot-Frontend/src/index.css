@@ -6,10 +6,10 @@
 :root {
   --radius: 0.75rem;
   
-  /* Brand Colors - Orange & Black Premium Palette */
-  --sixt-orange: #FF5F00;
-  --sixt-orange-light: #FF7A2E;
-  --sixt-orange-dark: #E55500;
+  /* Brand Colors - Burgundy & Black Premium Palette */
+  --sixt-orange: #800020;
+  --sixt-orange-light: #A00030;
+  --sixt-orange-dark: #600018;
   --sixt-black: #000000;
   --sixt-white: #FFFFFF;
   --sixt-gray-50: #F9FAFB;
@@ -142,13 +142,13 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #FF5F00 0%, #E55500 100%);
+  background: linear-gradient(180deg, #800020 0%, #600018 100%);
   border-radius: 10px;
   transition: all 0.3s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #FF7A2E 0%, #FF5F00 100%);
+  background: linear-gradient(180deg, #A00030 0%, #800020 100%);
 }
 
 ::-webkit-scrollbar-track {
@@ -258,11 +258,11 @@
 
 /* Premium Gradient Backgrounds */
 .bg-gradient-sixt {
-  background: linear-gradient(135deg, #FF5F00 0%, #E55500 100%);
+  background: linear-gradient(135deg, #800020 0%, #600018 100%);
 }
 
 .bg-gradient-sixt-light {
-  background: linear-gradient(135deg, #FF7A2E 0%, #FF5F00 100%);
+  background: linear-gradient(135deg, #A00030 0%, #800020 100%);
 }
 
 .bg-gradient-dark {
@@ -271,7 +271,7 @@
 
 /* Premium Shadow Effects */
 .shadow-sixt {
-  box-shadow: 0 10px 40px rgba(255, 95, 0, 0.2);
+  box-shadow: 0 10px 40px rgba(128, 0, 32, 0.2);
 }
 
 .shadow-sixt-lg {
