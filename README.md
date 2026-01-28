@@ -1,41 +1,54 @@
-# University Prospectus RAG Chatbot Backend
+# University Prospectus RAG Chatbot (Full Stack)
 
-This project is a **Retrieval-Augmented Generation (RAG) backend** built
-with Flask, Azure OpenAI, and Azure Cognitive Search.\
-It enables conversational Q&A over university documents with
-session-based chat history and observability.
+This project is a **full‑stack Retrieval-Augmented Generation (RAG)
+chatbot** for answering questions about university documents.\
+It includes a **Flask backend** with Azure OpenAI + Azure Cognitive
+Search and a **Vite + TypeScript frontend**.
 
 ------------------------------------------------------------------------
 
 ## Features
 
--   Semantic & vector search with Azure Cognitive Search\
+-   Vector & semantic search with Azure Cognitive Search\
 -   Query rewriting using conversation history\
--   Azure OpenAI (GPT) for answer generation\
+-   Azure OpenAI (GPT) answer generation\
 -   Session-based chat memory\
 -   Token usage logging\
--   Arize AX tracing (OpenInference)\
+-   Arize AX observability (OpenInference)\
 -   REST API for frontend integration\
--   Docker support
+-   Docker support\
+-   Vite + TypeScript frontend UI
 
 ------------------------------------------------------------------------
 
 ## Project Structure
 
-    .
-    ├── app.py
-    ├── RAG.py
-    ├── Dockerfile
-    ├── docker-compose.yml
-    ├── .env.example
-    ├── requirements.txt
-    └── README.md
+``` bash
+.
+├── backend/
+│   ├── app.py
+│   ├── RAG.py
+│   ├── Dockerfile
+│   ├── docker-compose.yml
+│   ├── .env.example
+│   ├── requirements.txt
+│   └── README.md
+│
+├── frontend/
+│   ├── src/
+│   ├── public/
+│   ├── index.html
+│   ├── package.json
+│   ├── vite.config.ts
+│   ├── tsconfig.json
+│   └── README.md
+```
 
 ------------------------------------------------------------------------
 
-## Environment Variables
+## Environment Variables (Backend)
 
-Create a `.env` file:
+Create `backend/.env`:
 
 ``` env
 COGNITIVESEARCHCONNECTOR5_API_KEY=...
@@ -54,58 +67,64 @@ VERBOSE=true
 
 ------------------------------------------------------------------------
 
-## Local Setup
+# Backend Setup
+
+## Local Run
 
 ``` bash
+cd backend
 pip install -r requirements.txt
 python app.py
 ```
 
-API runs on:
+Backend API:
 
     http://localhost:8000/chat
 
 ------------------------------------------------------------------------
 
-## API Example
+## Backend with Docker
 
-**Request**
+``` bash
+cd backend
+docker build -t university-rag-backend .
+docker run -p 8000:8000 --env-file .env university-rag-backend
+```
+
+or
+
+``` bash
+docker compose up --build
+```
+
+------------------------------------------------------------------------
+
+# Frontend Setup 
+
+``` bash
+cd frontend
+npm install
+npm run dev
+```
+
+Frontend runs at:
+
+    http://localhost:5173
+
+------------------------------------------------------------------------
+
+## Frontend → Backend API
+
+Frontend sends requests to:
+
+    POST http://localhost:8000/chat
+
+Example request:
 
 ``` json
 {
   "chatInput": "Which faculties exist at UDG?"
 }
-```
-
-**Response**
-
-``` json
-{
-  "answer": "...",
-  "sessionId": "uuid"
-}
-```
-
-------------------------------------------------------------------------
-
-## Docker
-
-### Build
-
-``` bash
-docker build -t university-rag-backend .
-```
-
-### Run
-
-``` bash
-docker run -p 8000:8000 --env-file .env university-rag-backend
-```
-
-### Docker Compose
-
-``` bash
-docker compose up --build
 ```
 
 ------------------------------------------------------------------------
@@ -122,8 +141,18 @@ docker compose up --build
 
 ## Notes
 
--   Chat history is stored in-memory (for production use Redis/DB)\
--   Do not commit `.env`\
--   Restrict API keys and enable CORS properly in production
+-   Chat history is stored in-memory (use Redis/DB in production)\
+-   Do not commit `.env` files\
+-   Configure CORS for production\
+-   Secure API keys
+
+------------------------------------------------------------------------
+
+## Tech Stack
+
+**Backend:** Python, Flask, LangChain, Azure OpenAI, Azure Cognitive
+Search\
+**Frontend:** Vite, TypeScript, React/TS\
+**Infra:** Docker, Azure
 
 
