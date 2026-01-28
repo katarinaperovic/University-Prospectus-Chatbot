@@ -8,28 +8,24 @@ from openinference.instrumentation.langchain import LangChainInstrumentor
 
 load_dotenv()
 
-# Log
 def log(message: str):
     verbose = os.environ.get("VERBOSE", "false")
     if verbose.lower() == "true":
         print(message, flush=True)
 
 
-# Arize OpenTelemetry Tracing setup
 tracer_provider = register(
     space_id=os.getenv("ARIZE_SPACE_ID"),
     api_key=os.getenv("ARIZE_API_KEY"),
     project_name="university-rag-backend",
-    endpoint=Endpoint.ARIZE_EUROPE,  # vazno!!
+    endpoint=Endpoint.ARIZE_EUROPE, 
     log_to_console=True           
 )
 
-# Instrumentovanje LangChain da automatski šalje trace-ove u Arize AX
 LangChainInstrumentor().instrument(tracer_provider=tracer_provider)
 log("LangChain tracing za Arize AX je uključen.")
 
 
-#LLM 
 llm = AzureChatOpenAI(
     azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
     api_key=os.getenv("AZURE_OPENAI_API_KEY"),
@@ -38,11 +34,8 @@ llm = AzureChatOpenAI(
     temperature=0.1
 )
 
-# Chat history per session (not per user - no login needed)
 user_chat_histories = {}
 
-
-# Pretraga (Azure Cognitive Search)
 def vector_search(search_text: str, index_name: str):
     api_key_search = os.getenv("COGNITIVESEARCHCONNECTOR5_API_KEY")
     index_endpoint = os.getenv("COGNITIVESEARCHCONNECTOR5_API_BASE")
@@ -79,7 +72,6 @@ def vector_search(search_text: str, index_name: str):
 
         results = search_results.get("value", [])
 
-        # Pronađeno
         log("\n==================== AZURE SEARCH DEBUG ====================")
         log(f"Upit: {search_text}")
         log(f"Index: {index_name}")
@@ -111,10 +103,8 @@ def vector_search(search_text: str, index_name: str):
     
 
 def rewrite_query(user_question: str, session_id: str = "default") -> str:
-    # Get chat history for context
     chat_history = user_chat_histories.get(session_id, [])
     
-    # Build conversation context
     history_context = ""
     if chat_history:
         history_context = "\n\nPrevious conversation:\n"
@@ -177,12 +167,10 @@ Return ONLY the reformatted question, nothing else."""),
     log(f"Rewritten question: {rewritten_question}")
     return rewritten_question
 
-# Augmentation and generation
 def ask_question(user_question: str, session_id: str = "default"):
     rewritten_question = rewrite_query(user_question, session_id)
     context = vector_search(rewritten_question, os.getenv("COGNITIVESEARCHCONNECTOR5_INDEX_NAME"))
 
-    # Get session-specific chat history
     chat_history = user_chat_histories.get(session_id, [])
 
     messages = [
@@ -198,14 +186,12 @@ If the answer is not found in either the Context or conversation history, respon
     result = llm.invoke(messages)
     answer = result.content
 
-    # Token tracking
     token_usage = result.response_metadata.get("token_usage", {})
     log("\nTOKEN USAGE")
     log(f"Prompt tokens:     {token_usage.get('prompt_tokens', 0)}")
     log(f"Completion tokens: {token_usage.get('completion_tokens', 0)}")
     log(f"Total tokens:      {token_usage.get('total_tokens', 0)}")
   
-    # Update session history
     chat_history.append(HumanMessage(content=user_question))
     chat_history.append(AIMessage(content=answer))
     user_chat_histories[session_id] = chat_history
