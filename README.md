@@ -1,4 +1,4 @@
-# University Prospectus RAG Chatbot (Full Stack)
+# University Prospectus RAG Chatbot 
 
 This project is a **full‑stack Retrieval-Augmented Generation (RAG)
 chatbot** for answering questions about university documents.\
