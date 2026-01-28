@@ -1,4 +1,4 @@
-# University Prospectus RAG Chatbot Backend
+# University Prospectus RAG Chatbot
 
 This project is a **Retrieval-Augmented Generation (RAG) backend** built
 with Flask, Azure OpenAI, and Azure Cognitive Search.\
